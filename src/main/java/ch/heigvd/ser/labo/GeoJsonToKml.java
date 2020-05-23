@@ -2,8 +2,9 @@ package ch.heigvd.ser.labo;
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.util.ArrayList;
 
-public class JsonToKml {
+public class GeoJsonToKml {
 
     final static String GEO_JSON = "src/main/resources/countries.geojson";
 
@@ -13,12 +14,10 @@ public class JsonToKml {
             FileReader reader = new FileReader(GEO_JSON);
 
             GeoParser parser = new GeoParser(reader);
+            ArrayList<Country> countries = parser.parse();
 
-            System.out.println(reader);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
-
-        System.out.println("Hello SER");
     }
 }
