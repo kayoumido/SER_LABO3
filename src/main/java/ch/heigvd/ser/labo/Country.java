@@ -25,7 +25,7 @@ public class Country {
             // so to get the number of coordinate for a "wall" we need to go down an extra layer
             // i.e we need to do a `.get(0)`.
             //
-            // here's an example of MultiiPolygon structure:
+            // here's an example of MultiPolygon structure:
             //  JSONArray [
             //      JSONArray [             <-- a `Polygon` doesn't have this layer
             //          JSONArray [
