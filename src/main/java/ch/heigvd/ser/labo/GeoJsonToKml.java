@@ -12,7 +12,6 @@ public class GeoJsonToKml {
 
         try {
             FileReader reader = new FileReader(GEO_JSON);
-
             new KmlGenerator().generate(new GeoParser(reader).parse());
 
         } catch (FileNotFoundException e) {

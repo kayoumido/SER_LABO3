@@ -4,11 +4,11 @@ import org.json.simple.JSONArray;
 
 public class Country {
 
-    private String name;
-    private String isoA3;
+    private final String name;
+    private final String isoA3;
 
-    private String geometry;
-    private JSONArray coordinates;
+    private final String geometry;
+    private final JSONArray coordinates;
 
     public Country(String name, String isoA3, String geometry, JSONArray coordinates) {
         this.name = name;
