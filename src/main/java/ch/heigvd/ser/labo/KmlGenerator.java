@@ -34,6 +34,8 @@ public class KmlGenerator {
                 )
             );
 
+            kDocument.addContent(style);
+
             for (Country country : countries) {
                 Element placemark = new Element("Placemark", kml.getNamespace());
 
