@@ -1,109 +1,81 @@
 package ch.heigvd.ser.labo;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.*;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 
+import org.jdom2.*;
+import org.jdom2.output.*;
+
+
 public class KmlGenerator {
+    private static final String xmlFilePath = "src/main/output/countries.kml";
+    private static final String styleId = "labStyle";
 
+    /**
+     * Generate a kml file based on an ArrayList of countries
+     * @param countries to convert to kml
+     */
     public void generate(ArrayList<Country> countries) {
-        // get an instance of the `DocumentBuilderFactory`
-        final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-
         try {
-            // create builder
-            final DocumentBuilder builder = factory.newDocumentBuilder();
-            // create document
-            final Document document = builder.newDocument();
 
-            // create root node and append it to the document
-            final Element root = document.createElement("kml");
-            root.setAttribute("xmlns", "http://www.opengis.net/kml/2.2");
-            root.setAttribute("xmlns:gx", "http://www.google.com/kml/ext/2.2");
-            document.appendChild(root);
+            Element kml = new Element("kml", "http://www.opengis.net/kml/2.2");
+            Document document = new Document(kml);
 
-            final Element kDocument = document.createElement("Document");
-            root.appendChild(kDocument);
+            Element kDocument = new Element("Document");
 
-            // Set the styles
-            final Element style = document.createElement("PolyStyle");
-            style.setAttribute("id", "labStyle");
-            kDocument.appendChild(style);
-            final Element fill = document.createElement("fill");
-            fill.appendChild(document.createTextNode("0"));
-            style.appendChild(fill);
-
+            // Generate the style tags to respect the style
+            // of the lab
+            Element style = new Element("Style");
+            style.setAttribute(new Attribute("id", styleId));
+            style.addContent(
+                new Element("PolyStyle").addContent(
+                    new Element("fill").setText("0")
+                )
+            );
 
             for (Country country : countries) {
-                // for the moment skip MultiPolygon
-                final Element placemark = document.createElement("Placemark");
-                kDocument.appendChild(placemark);
+                Element placemark = new Element("Placemark");
 
-                final Element name = document.createElement("name");
-                name.appendChild(document.createTextNode(country.getName()));
-                placemark.appendChild(name);
+                placemark.addContent(new Element("name").setText(country.getName()));
+                placemark.addContent(new Element("styleUrl").setText("#" + styleId));
 
-                final Element styleUrl = document.createElement("styleUrl");
-                styleUrl.appendChild(document.createTextNode("#labStyle"));
-                placemark.appendChild(styleUrl);
-
-                placemark.appendChild(
+                placemark.addContent(
                     country.getGeometry().equals("MultiPolygon") ?
-                        generateMultiPolygon(document, country) :
-                        generatePolygon(document, country, 0)
+                        generateMultiPolygon(country) :
+                        generatePolygon(country, 0)
                 );
+
+                kDocument.addContent(placemark);
             }
 
-            // Finalising document
-            final TransformerFactory transformerFactory = TransformerFactory.newInstance();
-            final Transformer transformer               = transformerFactory.newTransformer();
-            final DOMSource source                      = new DOMSource(document);
-            final StreamResult result                   = new StreamResult(new File("countries.kml"));
+            document.getRootElement().addContent(kDocument);
 
-            document.setXmlStandalone(false);
-            document.setXmlVersion("1.0");
-            transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
+            XMLOutputter xmlOutputter = new XMLOutputter();
+            xmlOutputter.setFormat(Format.getPrettyFormat());
+            xmlOutputter.output(document, new FileWriter(xmlFilePath));
 
-            transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-            transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "3");
-
-            transformer.transform(source, result);
-
-        } catch (ParserConfigurationException | TransformerException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    public Element generateMultiPolygon(Document document, Country country) {
-        Element multiGeometry = document.createElement("MultiGeometry");
+    public Element generateMultiPolygon(Country country) {
+        Element multiGeometry = new Element("MultiGeometry");
 
         for (int i = 0; i < country.getPolygonCount(); ++i)
-            multiGeometry.appendChild(generatePolygon(document, country, i));
+            multiGeometry.addContent(generatePolygon(country, i));
 
         return multiGeometry;
     }
 
-    public Element generatePolygon(Document document, Country country, int i) {
-        Element polygon = document.createElement("Polygon");
-
-        Element outerBoundary = document.createElement("outerBoundaryIs");
-        polygon.appendChild(outerBoundary);
-
-        Element linearRing = document.createElement("LinearRing");
-        outerBoundary.appendChild(linearRing);
-
-        Element coordinates = document.createElement("coordinates");
-        coordinates.appendChild(document.createTextNode(country.getStringCoord(i)));
-        linearRing.appendChild(coordinates);
-
-        return polygon;
+    public Element generatePolygon(Country country, int i) {
+        return new Element("Polygon").addContent(
+            new Element("outerBoundaryIs").addContent(
+              new Element("LinearRing").addContent(
+                  new Element("coordinates").setText(country.getStringCoord(i))
+              )
+            )
+        );
     }
 }
