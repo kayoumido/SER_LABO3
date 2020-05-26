@@ -22,32 +22,32 @@ public class KmlGenerator {
             Element kml = new Element("kml", "http://www.opengis.net/kml/2.2");
             Document document = new Document(kml);
 
-            Element kDocument = new Element("Document");
+            Element kDocument = new Element("Document", kml.getNamespace());
 
             // Generate the style tags to respect the style
             // of the lab
-            Element style = new Element("Style");
+            Element style = new Element("Style", kml.getNamespace());
             style.setAttribute(new Attribute("id", styleId));
             style.addContent(
-                new Element("PolyStyle").addContent(
-                    new Element("fill").setText("0")
+                new Element("PolyStyle", kml.getNamespace()).addContent(
+                    new Element("fill", kml.getNamespace()).setText("0")
                 )
             );
 
             for (Country country : countries) {
-                Element placemark = new Element("Placemark");
+                Element placemark = new Element("Placemark", kml.getNamespace());
 
-                placemark.addContent(new Element("name").setText(country.getName()));
-                placemark.addContent(new Element("styleUrl").setText("#" + styleId));
+                placemark.addContent(new Element("name", kml.getNamespace()).setText(country.getName()));
+                placemark.addContent(new Element("styleUrl", kml.getNamespace()).setText("#" + styleId));
 
                 placemark.addContent(
                     country.getGeometry().equals("MultiPolygon") ?
-                        generateMultiPolygon(country) :
-                        generatePolygon(country, 0)
+                        generateMultiPolygon(country, kml) :
+                        generatePolygon(country, 0, kml)
                 );
 
                 kDocument.addContent(placemark);
-            }
+        }
 
             document.getRootElement().addContent(kDocument);
 
@@ -60,20 +60,20 @@ public class KmlGenerator {
         }
     }
 
-    public Element generateMultiPolygon(Country country) {
-        Element multiGeometry = new Element("MultiGeometry");
+    public Element generateMultiPolygon(Country country, Element kml) {
+        Element multiGeometry = new Element("MultiGeometry", kml.getNamespace());
 
         for (int i = 0; i < country.getPolygonCount(); ++i)
-            multiGeometry.addContent(generatePolygon(country, i));
+            multiGeometry.addContent(generatePolygon(country, i, kml));
 
         return multiGeometry;
     }
 
-    public Element generatePolygon(Country country, int i) {
-        return new Element("Polygon").addContent(
-            new Element("outerBoundaryIs").addContent(
-              new Element("LinearRing").addContent(
-                  new Element("coordinates").setText(country.getStringCoord(i))
+    public Element generatePolygon(Country country, int i, Element kml) {
+        return new Element("Polygon", kml.getNamespace()).addContent(
+            new Element("outerBoundaryIs", kml.getNamespace()).addContent(
+              new Element("LinearRing", kml.getNamespace()).addContent(
+                  new Element("coordinates", kml.getNamespace()).setText(country.getStringCoord(i))
               )
             )
         );
