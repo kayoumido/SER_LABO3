@@ -9,12 +9,14 @@ import org.jdom2.output.*;
 
 
 public class KmlGenerator {
-    private static final String xmlFilePath = "src/main/output/countries.kml";
+
+    private static final String outputFile = "src/main/output/countries.kml";
     private static final String styleId = "labStyle";
 
     /**
      * Generate a kml file based on an ArrayList of countries
-     * @param countries to convert to kml
+     *
+     * @param countries - ArrayList of countries containing the data to generate the KML
      */
     public void generate(ArrayList<Country> countries) {
         try {
@@ -36,16 +38,23 @@ public class KmlGenerator {
 
             kDocument.addContent(style);
 
+            // generate a Placemark for every country found in the given ArrayList
+            // Note: the Placemark has a slightly different structure depending on if the
+            //  country if a `Polygon` or a `MultiPolygon`. A `MultiPolygon` is a wrapper
+            //  for multiple polygons (hence it's name).
+            //  In KML terms, I `MultiPolygon` is actually a `MultiGeometry`
             for (Country country : countries) {
                 Element placemark = new Element("Placemark", kml.getNamespace());
 
                 placemark.addContent(new Element("name", kml.getNamespace()).setText(country.getName()));
                 placemark.addContent(new Element("styleUrl", kml.getNamespace()).setText("#" + styleId));
 
+                // check the geometry of the current country to generate the correct structure
+                // and add it to the placemark
                 placemark.addContent(
                     country.getGeometry().equals("MultiPolygon") ?
-                        generateMultiPolygon(country, kml) :
-                        generatePolygon(country, 0, kml)
+                        generateMultiPolygon(country, kml.getNamespace()) :
+                        generatePolygon(country, 0, kml.getNamespace())
                 );
 
                 kDocument.addContent(placemark);
@@ -55,27 +64,45 @@ public class KmlGenerator {
 
             XMLOutputter xmlOutputter = new XMLOutputter();
             xmlOutputter.setFormat(Format.getPrettyFormat());
-            xmlOutputter.output(document, new FileWriter(xmlFilePath));
+            xmlOutputter.output(document, new FileWriter(outputFile));
 
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    public Element generateMultiPolygon(Country country, Element kml) {
-        Element multiGeometry = new Element("MultiGeometry", kml.getNamespace());
+    /**
+     * Generate a `MultiPolygon` based on the data of a Country object
+     *
+     * @param country   - Country object to get the data from
+     * @param namespace - namespace of the kml document
+     *
+     * @return generated MultiPolygon
+     */
+    private Element generateMultiPolygon(Country country, Namespace namespace) {
+        Element multiGeometry = new Element("MultiGeometry", namespace);
 
+        // loop through all the Polygons of the given country
         for (int i = 0; i < country.getPolygonCount(); ++i)
-            multiGeometry.addContent(generatePolygon(country, i, kml));
+            multiGeometry.addContent(generatePolygon(country, i, namespace));
 
         return multiGeometry;
     }
 
-    public Element generatePolygon(Country country, int i, Element kml) {
-        return new Element("Polygon", kml.getNamespace()).addContent(
-            new Element("outerBoundaryIs", kml.getNamespace()).addContent(
-              new Element("LinearRing", kml.getNamespace()).addContent(
-                  new Element("coordinates", kml.getNamespace()).setText(country.getStringCoord(i))
+    /**
+     * Generate a `Polygon` based on the data of a Country object
+     *
+     * @param country   - Country object to get the data from
+     * @param i         - index of the wanted polygon
+     * @param namespace - namespace of the kml document
+     *
+     * @return generated Polgon
+     */
+    private Element generatePolygon(Country country, int i, Namespace namespace) {
+        return new Element("Polygon", namespace).addContent(
+            new Element("outerBoundaryIs", namespace).addContent(
+              new Element("LinearRing", namespace).addContent(
+                  new Element("coordinates", namespace).setText(country.getStringCoord(i))
               )
             )
         );

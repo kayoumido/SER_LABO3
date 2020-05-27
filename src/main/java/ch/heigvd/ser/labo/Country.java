@@ -2,11 +2,17 @@ package ch.heigvd.ser.labo;
 
 import org.json.simple.JSONArray;
 
+/**
+ * Class used to represent a country found within a GEOJson file.
+ *
+ * The idea of having a class to represent a country is to have all the logic
+ *  that handles the country in one place to avoid having any clutter and code
+ *  duplication in the rest the code base.
+ */
 public class Country {
 
     private final String name;
     private final String isoA3;
-
     private final String geometry;
     private final JSONArray coordinates;
 
@@ -41,6 +47,7 @@ public class Country {
         this.coordinates = geometry.equals("MultiPolygon") ? coordinates : tmp;
     }
 
+    /* GETTERS */
     public String getName() {
         return name;
     }
@@ -53,6 +60,13 @@ public class Country {
         return this.coordinates.size();
     }
 
+    /**
+     * Get a specific coordinate in a String format
+     *
+     * @param i - index of the specific coordinate to retrieve
+     *
+     * @return wanted coordinate as String
+     */
     public String getStringCoord(int i) {
         StringBuilder sb = new StringBuilder();
 
