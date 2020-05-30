@@ -1,3 +1,9 @@
+/*
+ * Authors: Doran Kayoumi & Robin Cuénoud
+ * File: Country.java
+ * Date: 28.05.2020
+ */
+
 package ch.heigvd.ser.labo;
 
 import org.json.simple.JSONArray;

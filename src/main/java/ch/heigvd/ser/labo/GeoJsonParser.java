@@ -1,3 +1,9 @@
+/*
+ * Authors: Doran Kayoumi & Robin Cuénoud
+ * File: GeoJsonParser.java
+ * Date: 28.05.2020
+ */
+
 package ch.heigvd.ser.labo;
 
 import org.json.simple.JSONArray;
@@ -9,11 +15,11 @@ import java.io.IOException;
 import java.io.Reader;
 import java.util.ArrayList;
 
-public class GeoParser {
+public class GeoJsonParser {
     private Reader file;
     private ArrayList<Country> result = new ArrayList<>();
 
-    public GeoParser(Reader data) {
+    public GeoJsonParser(Reader data) {
         this.file = data;
     }
 

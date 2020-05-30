@@ -1,3 +1,9 @@
+/*
+ * Authors: Doran Kayoumi & Robin Cuénoud
+ * File: KMLGenerator.java
+ * Date: 28.05.2020
+ */
+
 package ch.heigvd.ser.labo;
 
 import java.io.FileWriter;
@@ -8,7 +14,7 @@ import org.jdom2.*;
 import org.jdom2.output.*;
 
 
-public class KmlGenerator {
+public class KMLGenerator {
 
     private static final String outputFile = "src/main/output/countries.kml";
     private static final String styleId = "labStyle";
