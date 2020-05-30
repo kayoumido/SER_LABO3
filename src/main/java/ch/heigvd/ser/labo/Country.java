@@ -79,10 +79,11 @@ public class Country {
         JSONArray coord = (JSONArray) ((JSONArray) this.coordinates.get(i)).get(0);
 
         for (Object c : coord) {
-            double coord1 = (double) ((JSONArray) c).get(0);
-            double coord2 = (double) ((JSONArray) c).get(1);
+            JSONArray coordinates = (JSONArray) c;
+            double coord1 = (double) coordinates.get(0);
+            double coord2 = (double) coordinates.get(1);
 
-            sb.append(String.format("%f,%f ", coord1, coord2));
+            sb.append(String.format("%s,%s ", coord1, coord2));
         }
 
         return sb.toString();
