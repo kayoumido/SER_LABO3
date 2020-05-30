@@ -64,7 +64,7 @@ public class KMLGenerator {
                 );
 
                 kDocument.addContent(placemark);
-        }
+            }
 
             document.getRootElement().addContent(kDocument);
 
