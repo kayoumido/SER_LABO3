@@ -52,9 +52,12 @@ public class GeoJsonParser {
         JSONObject properties = (JSONObject) jsonCountry.get("properties");
         JSONObject geometry = (JSONObject) jsonCountry.get("geometry");
 
+        // the elements within the `properties` tags aren't mandatory for
+        // a KML document, we added a check to see if they're present
+        // this to avoid any `NullPointer` exceptions
         Country country = new Country(
-            properties.get("ADMIN").toString(),
-            properties.get("ISO_A3").toString(),
+            properties.size() != 0 ? properties.get("ADMIN").toString() : "",
+            properties.size() != 0 ? properties.get("ISO_A3").toString() : "",
             geometry.get("type").toString(),
             (JSONArray) geometry.get("coordinates")
         );
